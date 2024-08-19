@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Database Monitoring</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+
+    :root {
+      --main-color: #075ac1;
+      --color-dark: #1d2231;
+      --text-gray: #8390a2;
+      --body-bg: #f1f5f9;
+    }
+
+    * {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      text-decoration: none;
+      list-style-type: none;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--body-bg);
+      font-family: 'Roboto', sans-serif;
+    }
+
+    #sidebar-toggle {
+      display: none;
+    }
+
+    .sidebar {
+      height: 100%;
+      width: 240px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      background-color: var(--main-color);
+      color: #ffffff;
+      overflow-y: auto;
+      transition: width 500ms;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 60px;
+      padding: 0rem 1rem;
+    }
+
+    .sidebar-menu {
+      padding: 1rem;
+    }
+
+    .sidebar li {
+      margin-bottom: 1.2rem;
+    }
+
+    .sidebar a {
+      color: #ffffff;
+      font-size: 0.9rem;
+    }
+
+    .sidebar a span:last-child {
+      padding-left: 0.6rem;
+    }
+
+    #sidebar-toggle:checked~.sidebar {
+      width: 60px;
+    }
+
+    #sidebar-toggle:checked~.sidebar .sidebar-header h3 span,
+    #sidebar-toggle:checked~.sidebar li span:last-child {
+      display: none;
+    }
+
+    #sidebar-toggle:checked~.sidebar .sidebar-header,
+    #sidebar-toggle:checked~.sidebar li {
+      display: flex;
+      justify-content: center;
+    }
+
+    #sidebar-toggle:checked~.main-content {
+      margin-left: 60px;
+    }
+
+    #sidebar-toggle:checked~.main-content header {
+      left: 60px;
+      width: calc(100% - 60px);
+    }
+
+    .main-content {
+      position: relative;
+      margin-left: 240px;
+      transition: margin-left 500ms;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 240px;
+      z-index: 100;
+      width: calc(100% - 240px);
+      background-color: #ffffff;
+      height: 60px;
+      padding: 0rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: solid 1px #ccc;
+      transition: 500ms;
+    }
+
+    .search-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
+    .search-wrapper input {
+      border: 0;
+      outline: 0;
+      padding: 1rem;
+      height: 38px;
+    }
+
+    .social-icons {
+      display: flex;
+      align-items: center;
+    }
+
+    .social-icons span,
+    .social-icons div {
+      margin-left: 1.2rem;
+    }
+
+    .social-icons div {
+      height: 38px;
+      width: 38px;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-image: url(img/hardylutula.jpeg);
+      border-radius: 50%;
+    }
+
+
+    main {
+      margin-top: 60px;
+      background-color: #f1f5f9;
+      min-height: 90vh;
+      padding: 1rem 3rem;
+    }
+
+    .dash-title {
+      color: var(--color-dark);
+      margin-bottom: 1rem;
+    }
+
+    .dash-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-column-gap: 3rem;
+    }
+
+    .card-single {
+      background-color: #ffffff;
+      border-radius: 7px;
+      box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-body {
+      padding: 1.3rem 1rem;
+      display: flex;
+      /*align-items: center;*/
+    }
+
+    .card-body span {
+      font-size: 1.5rem;
+      color: #777;
+      padding-right: 1.4rem;
+    }
+
+    .card-body h5 {
+      color: var(--text-gray);
+      font-size: 1rem;
+    }
+
+    .card-body h4 {
+      color: var(--color-dark);
+      font-size: 1.1rem;
+      margin-top: 0.2rem;
+    }
+
+    .card-footer {
+      padding: 0.2rem 1rem;
+      background: #f9fcfc;
+    }
+
+    .card-footer a {
+      color: var(--main-color);
+    }
+
+    .recent {
+      margin-top: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .activity-grid {
+      display: grid;
+      grid-template-columns: 75% 25%;
+      grid-column-gap: 1.5rem;
+    }
+
+    .activity-card,
+    .summery-card,
+    .bday-card {
+      background-color: #ffffff;
+      border-radius: 7px;
+    }
+
+    .activity-card h3 {
+      color: #ee1515;
+      margin: 1rem;
+    }
+
+    .activity-card table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .activity-card thead {
+      background: #efefef;
+      /*text-align: left;*/
+    }
+
+    th,
+    td {
+      font-size: 0.9rem;
+      padding: 1rem 1rem;
+      color: var(--color-dark);
+      /*align-items: left;*/
+    }
+    th {
+      background-color: #dadbe0;
+    }
+    
+    table {
+      text-align: center;
+    }
+
+    td {
+      font-size: 0.8rem;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f9fafc;
+    }
+
+    .badge {
+      padding: 0.2rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.7rem;
+    }
+
+    .badge.success {
+      background: #def7ec;
+      color: var(--main-color);
+    }
+
+    .badge.warning {
+      background: #f0f6b2;
+      color: orange;
+    }
+
+    .td-team {
+      display: flex;
+      /*align-items: center;*/
+    }
+
+    .img-1,
+    .img-2,
+    .img-3 {
+      height: 38px;
+      width: 38px;
+      border-radius: 38px;
+      margin-left: -15px;
+      border: solid 3px #efefef;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    .img-1 {
+      background-image: url(img/hardylutula.jpeg);
+    }
+
+    .img-2 {
+      background-image: url(img/hardy2.jpeg);
+    }
+
+    .summery-card {
+      margin-bottom: 1.5rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .summery-single {
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .summery-single span {
+      font-size: 1.5rem;
+      color: #777;
+      padding-right: 1rem;
+    }
+
+    .summery-single h5 {
+      color: var(--main-color);
+      font-size: 1.1rem;
+      margin-bottom: 0rem !important;
+    }
+
+    .summery-single small {
+      font-weight: 700;
+      color: var(--text-gray);
+    }
+
+    .bday-flex {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.3rem;
+    }
+
+    .bday-card {
+      padding: 1rem;
+    }
+
+    .bday-img {
+      height: 60px;
+      width: 60px;
+      border-radius: 50%;
+      border: solid 3px #efefef;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-image: url(img/hardylutula.jpeg);
+      margin-left: 0.7rem;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-center button {
+      background-color: var(--main-color);
+      color: #ffffff;
+      border: solid 1px var(--main-color);
+      border-radius: 4px;
+      padding: 0.4rem 1rem;
+    }
+
+    @media only screen and (max-width: 1200px) {
+      .sidebar {
+        width: 60px;
+      }
+
+      .sidebar .sidebar-header h3 span,
+      .sidebar li span:last-child {
+        display: none;
+      }
+
+      .sidebar .sidebar-header,
+      .sidebar li {
+        display: flex;
+        justify-content: center;
+      }
+
+      .main-content {
+        margin-left: 60px;
+      }
+
+      .main-content header {
+        left: 60px;
+      }
+
+    }
+  </style>
+</head>
+
+<body>
+  <input type="checkbox" id="sidebar-toggle" />
+  <!--side bar-->
+  <div class="sidebar">
+    <!--sidebar-header-->
+    <div class="sidebar-header">
+      <h3 class="brand">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid-1x2-fill"
+            viewBox="0 0 16 16">
+            <path
+              d="M0 1a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm9 0a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1V1zm0 9a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5z" />
+          </svg>
+        </span>
+        <span>DA Report</span>
+      </h3>
+
+    </div>
+
+    <!--sidebar-menu-->
+    <div class="sidebar-menu">
+      <ul>
+        <li>
+          <a href="#" class="nav-link" id="repcrmlink" <span>REPCRM</span>
+          </a>
+        </li>
+        <li>
+        <li>
+          <a href="#" class="nav-link" id="repcustlink" <span>REPCUST</span>
+          </a>
+        </li>
+        <li>
+        <li>
+          <a href="#" class="nav-link" id="repomslink" <span>REPOMS</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-link" id="repetllink" <span>REPETL</span>
+          </a>
+        </li>
+    </div>
+  </div>
+
+  <!--main-content-->
+  <div class="main-content">
+    <!--header-->
+    <header>
+      <div class="search-wrapper">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
+            viewBox="0 0 16 16">
+            <path
+              d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+          </svg>
+        </span>
+        <input type="text" name="search" placeholder="Search" />
+      </div>
+
+      <div class="social-icons">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell"
+            viewBox="0 0 16 16">
+            <path
+              d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z" />
+          </svg>
+        </span>
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-text"
+            viewBox="0 0 16 16">
+            <path
+              d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z" />
+            <path
+              d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8zm0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z" />
+          </svg>
+        </span>
+        <div></div>
+      </div>
+    </header>
+
+
+    <!--main-->
+    <div class="content-body">
+      <main>
+        <h1 id="home" style="text-align: center;">Database Monitoring Dashboard</h1>
+        <div id="home" class="content-section">
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+
+                <!---<h1>HomePage of Database Alert Monitoring</h1>--->
+
+              </div>
+            </div>
+          </section>
+        </div>
+        <!--cards-->
+
+        <div id="repcrmcontent" class="content-section" style="display: none;">
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div style="display: inline-block; width: 30%;">
+                <div class="activity-card">
+                  <h3>Database Metrics</h3>
+                  <table border="1">
+                    <tr>
+                      <th>Parameter</th>
+                      <th>Value</th>
+                    </tr>
+                    <tr>
+                      <td>SGA Utilization (MB)</td>
+                      <td> 28672</td>
+                    </tr>
+                    <tr>
+                      <td>PGA Utilization (MB)</td>
+                      <td> 1965.75</td>
+                    </tr>
+                    <tr>
+                      <td>Sessions Count</td>
+                      <td> 92</td>
+                    </tr>
+                    <tr>
+                      <td>Process Count</td>
+                      <td> 141</td>
+                    </tr>
+                    <tr>
+                      <td>CPU Utilization (%)</td>
+                      <td>10.5</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+                <h3>Long Running Queries</h3>
+                <table border="1">
+                  <tr>
+                    <th>INST_ID</th>
+                    <th>SID</th>
+                    <th>USERNAME</th>
+                    <th>EVENT</th>
+                    <th>MACHINE</th>
+                    <th>STATE</th>
+                    <th>SQL_ID</th>
+                    <th>SQL</th>
+                    <th>MINS</th>
+                  </tr>
+
+                  <tr>
+                    <td>1</td>
+                    <td>1586</td>
+                    <td>REPCRM</td>
+                    <td>db file sequential read</td>
+                    <td>iebspgvr</td>
+                    <td>WAITED SHO</td>
+                    <td>bt83va6pmvg1c</td>
+                    <td>select /*+ parallel(ta,ti,tn,dp,t</td>
+                    <td>4</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+                <h3>Tablespace Utlization</h3>
+                <table border="1">
+                  <tr>
+                    <th>TableSpace</th>
+                    <th>Allocated(GB)</th>
+                    <th>Used(GB)</th>
+                    <th>Free(GB)</th>
+                    <th>Per Used</th>
+                    <th>Per Free</th>
+                  </tr>
+                  <tr>
+                    <td>LARGE_IX</td>
+                    <td>1056.79</td>
+                    <td>974.7</td>
+                    <td>82.08</td>
+                    <td>92.23</td>
+                    <td>7.77</td>
+                  </tr>
+
+                  <tr>
+                    <td>TBAP_ITEM_X</td>
+                    <td>73.77</td>
+                    <td>67.8</td>
+                    <td>5.97</td>
+                    <td>91.91</td>
+                    <td>8.09</td>
+                  </tr>
+
+                  <tr>
+                    <td>LARGE_D</td>
+                    <td>1552.96</td>
+                    <td>1417.99</td>
+                    <td>134.96</td>
+                    <td>91.31</td>
+                    <td>8.69</td>
+                  </tr>
+
+                  <tr>
+                    <td>MEDIUM_D</td>
+                    <td>275.11</td>
+                    <td>248.67</td>
+                    <td>26.44</td>
+                    <td>90.39</td>
+                    <td>9.61</td>
+                  </tr>
+
+                  <tr>
+                    <td>TBAP_ITEM_D</td>
+                    <td>187</td>
+                    <td>164.34</td>
+                    <td>22.66</td>
+                    <td>87.88</td>
+                    <td>12.12</td>
+                  </tr>
+
+                  <tr>
+                    <td>MEDIUM_IX</td>
+                    <td>60</td>
+                    <td>52.7</td>
+                    <td>7.3</td>
+                    <td>87.84</td>
+                    <td>12.16</td>
+                  </tr>
+
+                  <tr>
+                    <td>SFTS_GOLDENGATE</td>
+                    <td>25</td>
+                    <td>21.27</td>
+                    <td>3.73</td>
+                    <td>85.1</td>
+                    <td>14.9</td>
+                  </tr>
+
+                  <tr>
+                    <td>SMALL_D</td>
+                    <td>180</td>
+                    <td>142.63</td>
+                    <td>37.37</td>
+                    <td>79.24</td>
+                    <td>20.76</td>
+                  </tr>
+
+                  <tr>
+                    <td>UNDOTBS2</td>
+                    <td>20</td>
+                    <td>14.92</td>
+                    <td>5.08</td>
+                    <td>74.58</td>
+                    <td>25.42</td>
+                  </tr>
+
+                  <tr>
+                    <td>SMALL_IX</td>
+                    <td>45</td>
+                    <td>30.77</td>
+                    <td>14.23</td>
+                    <td>68.38</td>
+                    <td>31.62</td>
+                  </tr>
+
+                  <tr>
+                    <td>SYSAUX</td>
+                    <td>12.7</td>
+                    <td>8.42</td>
+                    <td>4.28</td>
+                    <td>66.32</td>
+                    <td>33.68</td>
+                  </tr>
+
+                  <tr>
+                    <td>UNDOTBS1</td>
+                    <td>240</td>
+                    <td>143.31</td>
+                    <td>96.69</td>
+                    <td>59.71</td>
+                    <td>40.29</td>
+                  </tr>
+
+                  <tr>
+                    <td>SYSTEM</td>
+                    <td>4</td>
+                    <td>1.8</td>
+                    <td>2.2</td>
+                    <td>45.06</td>
+                    <td>54.94</td>
+                  </tr>
+
+                  <tr>
+                    <td>TOOLS</td>
+                    <td>.98</td>
+                    <td>.15</td>
+                    <td>.82</td>
+                    <td>15.6</td>
+                    <td>84.4</td>
+                  </tr>
+
+                  <tr>
+                    <td>PRDOMS_DATA12_CACHE</td>
+                    <td>1</td>
+                    <td>.11</td>
+                    <td>.89</td>
+                    <td>11.29</td>
+                    <td>88.71</td>
+                  </tr>
+
+                  <tr>
+                    <td>USERS</td>
+                    <td>10</td>
+                    <td>.99</td>
+                    <td>9.01</td>
+                    <td>9.85</td>
+                    <td>90.15</td>
+                  </tr>
+
+                  <tr>
+                    <td>PRDOMS_DATA12_NOCACH</td>
+                    <td>10</td>
+                    <td>.07</td>
+                    <td>9.93</td>
+                    <td>.72</td>
+                    <td>99.28</td>
+                  </tr>
+
+                  <tr>
+                    <td>TDE_D</td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td>3</td>
+                    <td>.03</td>
+                    <td>99.97</td>
+                  </tr>
+
+                  <tr>
+                    <td>TDE_IX</td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td>3</td>
+                    <td>.03</td>
+                    <td>99.97</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+
+                <h3>Temp Tablespace Usage</h3>
+                <table border="1">
+                  <tr>
+                    <th>Tablespace Name</th>
+                    <th>Total MB</th>
+                    <th>Used MB</th>
+                    <th>Free MB</th>
+                  </tr>
+                  <tr>
+                    <td>TEMP </td>
+                    <td>61440</td>
+                    <td>7024</td>
+                    <td>54416</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+
+                <h3>Undo Tablespace Usage</h3>
+                <table border="1">
+                  <tr>
+                    <th>TABLESPACE_NAME</th>
+                    <th>SIZEGB</th>
+                    <th>USAGEGB</th>
+                    <th>FREEGB</th>
+                  </tr>
+                  <tr>
+                    <td>UNDOTBS1 </td>
+                    <td>240</td>
+                    <td>172.085083</td>
+                    <td>67.914917</td>
+                  </tr>
+                  <tr>
+                    <td>UNDOTBS2 </td>
+                    <td>20</td>
+                    <td>15.4963379</td>
+                    <td>4.50366211</td>
+                  </tr>
+                </table>
+
+              </div>
+            </div>
+          </section>
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+
+                <h3>Top SQL</h3>
+
+                <table border="1">
+                  <tr>
+                    <th>INST_ID</th>
+                    <th>SID</th>
+                    <th>USERNAME</th>
+                    <th>EVENT</th>
+                    <th>MACHINE</th>
+                    <th>STATE</th>
+                    <th>SQL_ID</th>
+                    <th>SQL</th>
+                    <th>MINS</th>
+                  </tr>
+
+                  <tr>
+                    <td>1</td>
+                    <td>1586</td>
+                    <td>REPCRM</td>
+                    <td>db file sequential read</td>
+                    <td>iebspgvr</td>
+                    <td>WAITED SHO</td>
+                    <td>bt83va6pmvg1c</td>
+                    <td>select /*+ parallel(ta,ti,tn,dp,t</td>
+                    <td>4</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!--- Tablespace Utlization Removed-->
+
+        </div>
+
+        <div id="repcustcontent" class="content-section" style="display: none;">
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div style="display: inline-block; width: 30%;">
+                <div class="activity-card">
+                  <h3>Database Metrics</h3>
+                  <table border="1">
+                    <tr>
+                      <th>Parameter</th>
+                      <th>Value</th>
+                    </tr>
+                    <tr>
+                      <td>SGA Utilization (MB)</td>
+                      <td> 28672</td>
+                    </tr>
+                    <tr>
+                      <td>PGA Utilization (MB)</td>
+                      <td> 1965.75</td>
+                    </tr>
+                    <tr>
+                      <td>Sessions Count</td>
+                      <td> 92</td>
+                    </tr>
+                    <tr>
+                      <td>Process Count</td>
+                      <td> 141</td>
+                    </tr>
+                    <tr>
+                      <td>CPU Utilization (%)</td>
+                      <td>10.5</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+                <h3>Long Running Queries</h3>
+                <table border="1">
+                  <tr>
+                    <th>INST_ID</th>
+                    <th>SID</th>
+                    <th>USERNAME</th>
+                    <th>EVENT</th>
+                    <th>MACHINE</th>
+                    <th>STATE</th>
+                    <th>SQL_ID</th>
+                    <th>SQL</th>
+                    <th>MINS</th>
+                  </tr>
+
+                  <tr>
+                    <td>1</td>
+                    <td>1586</td>
+                    <td>REPCUST</td>
+                    <td>db file sequential read</td>
+                    <td>iebspgvr</td>
+                    <td>WAITED SHO</td>
+                    <td>bt83va6pmvg1c</td>
+                    <td>select /*+ parallel(ta,ti,tn,dp,t</td>
+                    <td>4</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+                <h3>Tablespace Utlization</h3>
+                <table border="1">
+                  <tr>
+                    <th>TableSpace</th>
+                    <th>Allocated(GB)</th>
+                    <th>Used(GB)</th>
+                    <th>Free(GB)</th>
+                    <th>Per Used</th>
+                    <th>Per Free</th>
+                  </tr>
+                  <tr>
+                    <td>LARGE_IX</td>
+                    <td>1056.79</td>
+                    <td>974.7</td>
+                    <td>82.08</td>
+                    <td>92.23</td>
+                    <td>7.77</td>
+                  </tr>
+
+                  <tr>
+                    <td>TBAP_ITEM_X</td>
+                    <td>73.77</td>
+                    <td>67.8</td>
+                    <td>5.97</td>
+                    <td>91.91</td>
+                    <td>8.09</td>
+                  </tr>
+
+                  <tr>
+                    <td>LARGE_D</td>
+                    <td>1552.96</td>
+                    <td>1417.99</td>
+                    <td>134.96</td>
+                    <td>91.31</td>
+                    <td>8.69</td>
+                  </tr>
+
+                  <tr>
+                    <td>MEDIUM_D</td>
+                    <td>275.11</td>
+                    <td>248.67</td>
+                    <td>26.44</td>
+                    <td>90.39</td>
+                    <td>9.61</td>
+                  </tr>
+
+                  <tr>
+                    <td>TBAP_ITEM_D</td>
+                    <td>187</td>
+                    <td>164.34</td>
+                    <td>22.66</td>
+                    <td>87.88</td>
+                    <td>12.12</td>
+                  </tr>
+
+                  <tr>
+                    <td>MEDIUM_IX</td>
+                    <td>60</td>
+                    <td>52.7</td>
+                    <td>7.3</td>
+                    <td>87.84</td>
+                    <td>12.16</td>
+                  </tr>
+
+                  <tr>
+                    <td>SFTS_GOLDENGATE</td>
+                    <td>25</td>
+                    <td>21.27</td>
+                    <td>3.73</td>
+                    <td>85.1</td>
+                    <td>14.9</td>
+                  </tr>
+
+                  <tr>
+                    <td>SMALL_D</td>
+                    <td>180</td>
+                    <td>142.63</td>
+                    <td>37.37</td>
+                    <td>79.24</td>
+                    <td>20.76</td>
+                  </tr>
+
+                  <tr>
+                    <td>UNDOTBS2</td>
+                    <td>20</td>
+                    <td>14.92</td>
+                    <td>5.08</td>
+                    <td>74.58</td>
+                    <td>25.42</td>
+                  </tr>
+
+                  <tr>
+                    <td>SMALL_IX</td>
+                    <td>45</td>
+                    <td>30.77</td>
+                    <td>14.23</td>
+                    <td>68.38</td>
+                    <td>31.62</td>
+                  </tr>
+
+                  <tr>
+                    <td>SYSAUX</td>
+                    <td>12.7</td>
+                    <td>8.42</td>
+                    <td>4.28</td>
+                    <td>66.32</td>
+                    <td>33.68</td>
+                  </tr>
+
+                  <tr>
+                    <td>UNDOTBS1</td>
+                    <td>240</td>
+                    <td>143.31</td>
+                    <td>96.69</td>
+                    <td>59.71</td>
+                    <td>40.29</td>
+                  </tr>
+
+                  <tr>
+                    <td>SYSTEM</td>
+                    <td>4</td>
+                    <td>1.8</td>
+                    <td>2.2</td>
+                    <td>45.06</td>
+                    <td>54.94</td>
+                  </tr>
+
+                  <tr>
+                    <td>TOOLS</td>
+                    <td>.98</td>
+                    <td>.15</td>
+                    <td>.82</td>
+                    <td>15.6</td>
+                    <td>84.4</td>
+                  </tr>
+
+                  <tr>
+                    <td>PRDOMS_DATA12_CACHE</td>
+                    <td>1</td>
+                    <td>.11</td>
+                    <td>.89</td>
+                    <td>11.29</td>
+                    <td>88.71</td>
+                  </tr>
+
+                  <tr>
+                    <td>USERS</td>
+                    <td>10</td>
+                    <td>.99</td>
+                    <td>9.01</td>
+                    <td>9.85</td>
+                    <td>90.15</td>
+                  </tr>
+
+                  <tr>
+                    <td>PRDOMS_DATA12_NOCACH</td>
+                    <td>10</td>
+                    <td>.07</td>
+                    <td>9.93</td>
+                    <td>.72</td>
+                    <td>99.28</td>
+                  </tr>
+
+                  <tr>
+                    <td>TDE_D</td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td>3</td>
+                    <td>.03</td>
+                    <td>99.97</td>
+                  </tr>
+
+                  <tr>
+                    <td>TDE_IX</td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td>3</td>
+                    <td>.03</td>
+                    <td>99.97</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+
+                <h3>Temp Tablespace Usage</h3>
+                <table border="1">
+                  <tr>
+                    <th>Tablespace Name</th>
+                    <th>Total MB</th>
+                    <th>Used MB</th>
+                    <th>Free MB</th>
+                  </tr>
+                  <tr>
+                    <td>TEMP </td>
+                    <td>61440</td>
+                    <td>7024</td>
+                    <td>54416</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+
+                <h3>Undo Tablespace Usage</h3>
+                <table border="1">
+                  <tr>
+                    <th>TABLESPACE_NAME</th>
+                    <th>SIZEGB</th>
+                    <th>USAGEGB</th>
+                    <th>FREEGB</th>
+                  </tr>
+                  <tr>
+                    <td>UNDOTBS1 </td>
+                    <td>240</td>
+                    <td>172.085083</td>
+                    <td>67.914917</td>
+                  </tr>
+                  <tr>
+                    <td>UNDOTBS2 </td>
+                    <td>20</td>
+                    <td>15.4963379</td>
+                    <td>4.50366211</td>
+                  </tr>
+                </table>
+
+              </div>
+            </div>
+          </section>
+
+          <!--cards-->
+          <section class="recent">
+            <div class="activity-grid">
+              <div class="activity-card">
+
+                <h3>Top SQL</h3>
+
+                <table border="1">
+                  <tr>
+                    <th>INST_ID</th>
+                    <th>SID</th>
+                    <th>USERNAME</th>
+                    <th>EVENT</th>
+                    <th>MACHINE</th>
+                    <th>STATE</th>
+                    <th>SQL_ID</th>
+                    <th>SQL</th>
+                    <th>MINS</th>
+                  </tr>
+
+                  <tr>
+                    <td>1</td>
+                    <td>1586</td>
+                    <td>REPCUST</td>
+                    <td>db file sequential read</td>
+                    <td>iebspgvr</td>
+                    <td>WAITED SHO</td>
+                    <td>bt83va6pmvg1c</td>
+                    <td>select /*+ parallel(ta,ti,tn,dp,t</td>
+                    <td>4</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!--- Tablespace Utlization Removed-->
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+  <script src="script_dash.js"></script>
+</body>
+
+</html>
